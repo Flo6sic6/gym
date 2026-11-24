@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gym">
+<meta name="theme-color" content="#0F1115">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Gym-Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@500;600;700&display=swap">
+<style>
+:root{
+  --bg:#000; --card:#141414; --card2:#1C1C1C; --line:#262626; --btn:#1C1C1C;
+  --text:#FFF; --mute:#8C8C8C; --soft:#C9C9C9; --dim:#5C5C5C; --acc:#FF5A1F; --accText:#000; --warn:#FFB020; --bad:#FF4D4D; --ok:#7CD992;
+  --cond:"Barlow Condensed","Arial Narrow",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:Barlow,-apple-system,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{min-height:100dvh;overscroll-behavior-y:none}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+button:active{transform:scale(.97)}
+#app{max-width:560px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 12px) 18px calc(env(safe-area-inset-bottom) + 14px)}
+.c{font-family:var(--cond);font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.seg{display:flex;flex:1;background:var(--card);border-radius:6px;padding:4px;gap:4px}
+.seg button{flex:1;height:42px;border-radius:4px;color:var(--mute);font-family:var(--cond);font-weight:800;font-size:17px;letter-spacing:.06em;text-transform:uppercase}
+.seg button.on{background:var(--acc);color:var(--accText)}
+.iconbtn{width:44px;height:44px;border-radius:6px;background:var(--card);display:flex;align-items:center;justify-content:center;color:var(--soft);font-size:18px}
+.kicker{font-family:var(--cond);font-weight:800;font-size:15px;letter-spacing:.12em;color:var(--acc);text-transform:uppercase}
+h1{margin:0;font-family:var(--cond);font-weight:800;font-size:52px;line-height:.95;text-transform:uppercase;letter-spacing:-.005em;overflow-wrap:break-word}
+h1.page{font-size:44px}
+h2{margin:26px 0 10px;font-family:var(--cond);font-size:15px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.12em}
+.sub{color:var(--mute);font-size:14px;margin-top:6px}
+.card{background:var(--card);border-radius:8px;padding:14px}
+.list{display:flex;flex-direction:column;gap:8px}
+.day{display:flex;align-items:center;gap:12px;text-align:left;width:100%;min-height:74px;border-left:4px solid transparent}
+.day .t{font-family:var(--cond);font-weight:800;font-size:24px;text-transform:uppercase;line-height:1}
+.day .m{font-size:13px;color:var(--mute);margin-top:4px}
+.day.next{border-left-color:var(--acc)}
+.badge{font-family:var(--cond);font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:5px 8px;border-radius:3px;background:var(--acc);color:var(--accText);white-space:nowrap}
+.badge.warn{background:transparent;color:var(--warn);border:1.5px solid var(--warn)}
+.badge.ok{background:transparent;color:var(--ok);border:1.5px solid #2E5A38}
+.grow{flex:1;min-width:0}
+.chev{color:var(--dim);font-size:22px}
+.primary{height:60px;border-radius:8px;background:var(--acc);color:var(--accText);font-family:var(--cond);font-weight:800;font-size:24px;letter-spacing:.06em;text-transform:uppercase;width:100%}
+.secondary{height:48px;border-radius:6px;background:var(--btn);color:var(--text);font-family:var(--cond);font-weight:800;font-size:17px;letter-spacing:.06em;text-transform:uppercase;padding:0 16px}
+.ghost{height:44px;border-radius:6px;border:2px solid var(--line);color:var(--soft);font-family:var(--cond);font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding:0 14px}
+.outline{height:38px;border-radius:4px;border:2px solid var(--text);color:var(--text);font-family:var(--cond);font-weight:800;font-size:15px;letter-spacing:.08em;padding:0 14px;text-transform:uppercase}
+.chip{height:36px;border-radius:4px;border:2px solid var(--line);color:var(--soft);font-family:var(--cond);font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding:0 12px;white-space:nowrap}
+.chip.on{border-color:var(--acc);color:var(--acc)}
+.pill{font-family:var(--cond);font-weight:800;font-size:15px;letter-spacing:.04em;text-transform:uppercase;padding:6px 10px;border-radius:3px;background:var(--card2);color:var(--text);white-space:nowrap}
+.pill.acc{background:var(--acc);color:var(--accText)}
+.pill.line{background:transparent;border:2px solid var(--line);padding:4px 9px;color:var(--soft)}
+.row{display:flex;align-items:center;gap:8px}
+.wrap{flex-wrap:wrap}
+.muted{color:var(--mute)}
+.small{font-size:13px}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.varbtn{font-family:var(--cond);font-weight:600;font-size:17px;letter-spacing:.06em;color:var(--mute);text-transform:uppercase;text-align:left}
+.varbtn b{color:var(--text);font-weight:800}
+.last{margin-top:10px;font-size:13px;color:var(--mute)}
+.last b{color:var(--soft);font-weight:600}
+.tiles{display:grid;gap:6px;margin-top:22px}
+.tile{border-radius:6px;padding:10px;text-align:left;background:var(--card);color:var(--dim);min-height:64px}
+.tile .k{font-family:var(--cond);font-weight:800;font-size:13px;letter-spacing:.06em}
+.tile .v{font-family:var(--cond);font-weight:800;font-size:25px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile.done{background:var(--acc);color:var(--accText)}
+.tile.now{background:transparent;outline:2px solid var(--text);outline-offset:-2px;color:var(--text)}
+.tile.skip{background:transparent;outline:2px dashed var(--line);outline-offset:-2px}
+.editor{margin-top:auto;padding-top:18px;display:flex;flex-direction:column;gap:10px}
+.boxes{display:flex;gap:10px}
+.box{background:var(--card);border-radius:8px;padding:10px 12px;min-width:0}
+.box label{display:block;font-family:var(--cond);font-weight:800;font-size:13px;letter-spacing:.08em;color:var(--mute)}
+.num{width:100%;min-width:0;border:0;background:transparent;font-family:var(--cond);font-weight:800;font-size:64px;line-height:.95;padding:0;outline:none;color:var(--text);font-variant-numeric:tabular-nums}
+.num::placeholder{color:var(--dim)}
+.box:focus-within{outline:2px solid var(--acc)}
+.keys{display:flex;gap:10px}
+.keys button{height:50px;border-radius:6px;background:var(--btn);font-family:var(--cond);font-weight:800;font-size:24px}
+.keys .txt{font-size:15px;letter-spacing:.06em;color:var(--mute);text-transform:uppercase}
+.text{width:100%;height:44px;border-radius:6px;border:0;background:var(--card);padding:0 12px;font-size:16px;outline:none}
+.text:focus{outline:2px solid var(--acc)}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.foot button{height:44px;font-family:var(--cond);font-weight:800;font-size:16px;letter-spacing:.06em;color:var(--mute);text-transform:uppercase;padding:0 4px}
+.foot button:disabled{opacity:.3}
+.tabs{display:flex;gap:6px;margin-top:auto;padding-top:18px}
+.tabs button{flex:1;height:50px;border-radius:6px;color:var(--mute);font-family:var(--cond);font-weight:800;font-size:16px;letter-spacing:.08em;text-transform:uppercase}
+.tabs button.on{background:var(--card);color:var(--text)}
+.sess{display:flex;justify-content:space-between;gap:8px;font-family:var(--cond);font-weight:800;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute);margin:20px 0 8px}
+.lrow{display:flex;align-items:center;min-height:50px;border-bottom:1px solid var(--line);gap:8px}
+.lrow:last-child{border-bottom:0}
+.lrow .x{font-size:15px;font-weight:600}
+.lrow .y{font-size:12px;color:var(--mute)}
+.lrow .z{font-family:var(--cond);font-weight:800;font-size:22px;white-space:nowrap}
+.cardlist{background:var(--card);border-radius:8px;padding:2px 14px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;justify-content:center;z-index:10;animation:fade .15s}
+.sheet{background:#111;width:100%;max-width:560px;border-radius:14px 14px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom) + 18px);max-height:88dvh;overflow:auto;animation:up .2s ease-out;border-top:3px solid var(--acc)}
+.sheet h3{margin:0 0 8px;font-family:var(--cond);font-weight:800;font-size:30px;line-height:1;text-transform:uppercase}
+.sheet p{margin:0 0 14px;color:var(--soft);font-size:16px;line-height:1.45}
+.sheet .lbl{font-family:var(--cond);font-weight:800;font-size:14px;letter-spacing:.1em;color:var(--acc);text-transform:uppercase;margin:16px 0 6px}
+.opt{width:100%;min-height:54px;border-radius:6px;background:var(--card2);text-align:left;padding:0 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:16px;font-weight:600}
+.opt.on{outline:2px solid var(--acc)}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);background:var(--text);color:var(--bg);padding:11px 16px;border-radius:6px;font-family:var(--cond);font-weight:800;font-size:16px;letter-spacing:.04em;text-transform:uppercase;z-index:20;animation:fade .2s;max-width:90vw;text-align:center}
+.empty{padding:30px 0;text-align:center;color:var(--mute)}
+@keyframes fade{from{opacity:0}}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyrlBG4n-a_MBbbtzifG0YGKnZEkXyhjzED5p999lghNum95ErL5UphKpimEpNREr_scA/exec';
+const STORE = 'gymtracker_v1';
+const STANDORTE = ['Biberach', 'Lustenau'];
+
+/* ---------- Speicher ---------- */
+let S = load();
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORE));
+    if (s && s.v === 1) return s;
+  } catch (e) {}
+  return { v: 1, settings: { key: '', step: 2.5, standort: 'Biberach' }, plan: [], planAt: null, sessions: [], activeId: null };
+}
+function save() {
+  try { localStorage.setItem(STORE, JSON.stringify(S)); }
+  catch (e) { toast('Speichern fehlgeschlagen'); }
+}
+
+/* ---------- Hilfen ---------- */
+const $app = document.getElementById('app');
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2, 12));
+const num = v => { const n = parseFloat(String(v).replace(',', '.')); return isFinite(n) ? n : null; };
+const fmt = n => (n == null ? '' : String(Math.round(n * 100) / 100).replace('.', ','));
+const fmtDate = iso => new Date(iso).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+const isBody = v => /körpergewicht/i.test(v || '');
+const perHand = v => /kurzhantel/i.test(v || '');
+let toastT;
+function toast(msg) {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t); clearTimeout(toastT); toastT = setTimeout(() => t.remove(), 2600);
+}
+
+/* ---------- Plan ---------- */
+function days() {
+  const seen = [];
+  S.plan.forEach(r => { if (!seen.includes(r.trainingstag)) seen.push(r.trainingstag); });
+  return seen;
+}
+function exercisesFor(tag, standort) {
+  return S.plan
+    .filter(r => r.trainingstag === tag && (r.standort === 'beide' || r.standort === standort))
+    .sort((a, b) => Number(a.reihenfolge) - Number(b.reihenfolge))
+    .map(r => ({
+      ...r,
+      saetze: Math.max(1, parseInt(r.soll_saetze, 10) || 1),
+      varianten: [r.geraet_variante, ...String(r.alternative || '').split(';').map(s => s.trim())].filter(Boolean)
+    }));
+}
+function nextDay() {
+  const d = days(); if (!d.length) return null;
+  const done = S.sessions.filter(s => s.end).sort((a, b) => b.end.localeCompare(a.end))[0];
+  if (!done) return d[0];
+  const i = d.indexOf(done.tag);
+  return d[(i + 1) % d.length];
+}
+
+/* ---------- Server ---------- */
+async function post(body) {
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ key: S.settings.key, ...body })
+  });
+  return res.json();
+}
+async function loadPlan(silent) {
+  try {
+    const r = await post({ action: 'plan' });
+    if (!r.ok) throw new Error(r.fehler || 'Fehler');
+    S.plan = r.plan; S.planAt = new Date().toISOString(); save();
+    if (!silent) toast('Plan aktualisiert');
+    return true;
+  } catch (e) {
+    if (!silent) toast(e.message === 'nicht erlaubt' ? 'Schlüssel falsch' : 'Plan nicht erreichbar, nutze gespeicherten');
+    if (e.message === 'nicht erlaubt') throw e;
+    return false;
+  }
+}
+let syncing = false;
+async function sync(manual) {
+  if (syncing || !S.settings.key) return;
+  const open = S.sessions.filter(s => s.end && !s.sent && s.sets.length);
+  S.sessions.filter(s => s.end && !s.sent && !s.sets.length).forEach(s => s.sent = true);
+  if (!open.length) { save(); if (manual) toast('Alles gesendet'); return; }
+  syncing = true;
+  let ok = 0, fail = 0;
+  for (const s of open) {
+    try {
+      const r = await post({ action: 'log', saetze: s.sets.map(x => ({
+        id: x.id, datum_zeit: x.ts, einheit_id: s.id, standort: s.standort, trainingstag: s.tag,
+        uebung_id: x.uebung_id, uebung: x.uebung, geraet_variante: x.variant, satz_nr: x.satz_nr,
+        gewicht_kg: x.kg, zusatz_kg: x.zusatz, wiederholungen: x.wdh, soll_wdh: x.soll_wdh, notiz: x.notiz || ''
+      })) });
+      if (r.ok) { s.sent = true; ok++; } else { fail++; s.error = r.fehler; }
+    } catch (e) { fail++; }
+  }
+  syncing = false; save();
+  if (manual || ok) toast(fail ? (ok ? `${ok} gesendet, ${fail} offen` : 'Senden nicht möglich, später erneut') : 'Mit Log synchronisiert');
+  render();
+}
+
+/* ---------- Sitzung ---------- */
+const active = () => S.sessions.find(s => s.id === S.activeId) || null;
+function startSession(tag) {
+  const s = { id: uid(), tag, standort: S.settings.standort, start: new Date().toISOString(), end: null, sent: false,
+    sets: [], skipped: {}, variants: {}, idx: 0, edit: null };
+  S.sessions.push(s); S.activeId = s.id; save(); view = 'train'; render();
+}
+function finishSession() {
+  const s = active(); if (!s) return;
+  s.end = new Date().toISOString(); S.activeId = null; save();
+  view = 'home'; render(); sync(false);
+}
+function discardSession() {
+  const s = active(); if (!s) return;
+  S.sessions = S.sessions.filter(x => x.id !== s.id); S.activeId = null; save(); view = 'home'; render();
+}
+function variantOf(s, ex) {
+  if (s.variants[ex.uebung_id]) return s.variants[ex.uebung_id];
+  const pref = S.settings.variantPref && S.settings.variantPref[s.standort + '|' + ex.uebung_id];
+  if (pref && ex.varianten.includes(pref)) return pref;
+  return ex.varianten[0] || '';
+}
+function lastValues(ex, variant, standort, excludeId) {
+  const hist = S.sessions.filter(s => s.end && s.id !== excludeId).sort((a, b) => b.end.localeCompare(a.end));
+  const pick = st => {
+    for (const s of hist) {
+      if (st && s.standort !== st) continue;
+      const sets = s.sets.filter(x => x.uebung_id === ex.uebung_id && x.variant === variant).sort((a, b) => a.satz_nr - b.satz_nr);
+      if (sets.length) return { s, sets };
+    }
+    return null;
+  };
+  const same = pick(standort);
+  if (same) return { ...same, other: false };
+  const other = pick(null);
+  return other ? { ...other, other: true } : null;
+}
+function setLabel(x) {
+  const w = isBody(x.variant) ? (x.zusatz ? '+' + fmt(x.zusatz) + ' kg' : 'KG') : fmt(x.kg) + ' kg';
+  return `${w} × ${x.wdh}`;
+}
+
+/* ---------- Ansichten ---------- */
+let view = 'home', logFilter = 'alle';
+
+function render() {
+  if (!S.settings.key) return renderSetup();
+  if (S.activeId && view === 'train') return renderTrain();
+  if (view === 'log') return renderLog();
+  if (view === 'settings') return renderSettings();
+  renderHome();
+}
+
+function standortSwitch(disabled) {
+  return `<div class="seg" role="group" aria-label="Standort">${STANDORTE.map(o =>
+    `<button type="button" class="${S.settings.standort === o ? 'on' : ''}" data-standort="${o}" ${disabled ? 'disabled' : ''}>${o}</button>`).join('')}</div>`;
+}
+function tabs(on) {
+  return `<nav class="tabs">${[['home', 'Training'], ['log', 'Log'], ['settings', 'Einstellungen']].map(([k, l]) =>
+    `<button type="button" class="${on === k ? 'on' : ''}" data-view="${k}">${l}</button>`).join('')}</nav>`;
+}
+function unsentCount() { return S.sessions.filter(s => s.end && !s.sent && s.sets.length).length; }
+
+function renderSetup() {
+  $app.innerHTML = `
+    <div style="margin-top:30px"><h1 class="page">Gym-Tracker</h1><div class="sub">Einmalig verbinden. Den Schlüssel findest du im Ausführungsprotokoll des Apps Scripts.</div></div>
+    <div class="card" style="margin-top:22px;display:flex;flex-direction:column;gap:10px">
+      <label class="small muted" for="key">Schlüssel</label>
+      <input id="key" class="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Schlüssel einfügen">
+      <button type="button" class="primary" id="connect">Verbinden</button>
+    </div>`;
+  document.getElementById('connect').onclick = async () => {
+    const k = document.getElementById('key').value.trim();
+    if (k.length < 20) return toast('Schlüssel unvollständig');
+    S.settings.key = k;
+    try {
+      if (await loadPlan(true)) { save(); toast('Verbunden'); render(); }
+      else { S.settings.key = ''; toast('Keine Verbindung, bitte Netz prüfen'); }
+    } catch (e) { S.settings.key = ''; toast('Schlüssel falsch'); }
+  };
+}
+
+function renderHome() {
+  const s = active();
+  const nd = nextDay();
+  const un = unsentCount();
+  let html = `<div class="top">${standortSwitch(false)}</div>
+    <h1 class="page">Training</h1><div class="sub">${S.plan.length ? 'Reihenfolge A → Beine → B → C' : 'Noch kein Plan geladen'}</div>`;
+  if (s) {
+    html += `<h2>Offene Einheit</h2><div class="card"><div class="c" style="font-size:24px">${esc(s.tag)}</div>
+      <div class="sub">${esc(s.standort)} · gestartet ${new Date(s.start).toLocaleString('de-DE', { weekday: 'short', hour: '2-digit', minute: '2-digit' })} · ${s.sets.length} Sätze</div>
+      <div class="row" style="margin-top:12px"><button type="button" class="primary" data-act="resume" style="flex:2">Fortsetzen</button>
+      <button type="button" class="secondary" data-act="finish" style="flex:1;height:56px">Beenden</button></div></div>`;
+  }
+  if (un) html += `<button type="button" class="card row" data-act="sync" style="width:100%;margin-top:14px;text-align:left"><span class="badge warn">${un} nicht gesendet</span><span class="grow small muted">Tippen zum Senden</span></button>`;
+  html += `<h2>Trainingstag wählen</h2><div class="list">`;
+  days().forEach(d => {
+    const ex = exercisesFor(d, S.settings.standort);
+    if (!ex.length) return;
+    const sets = ex.reduce((a, e) => a + e.saetze, 0);
+    html += `<button type="button" class="card day ${d === nd && !s ? 'next' : ''}" data-day="${esc(d)}" ${s ? 'disabled style="opacity:.5"' : ''}>
+      <div class="grow"><div class="t">${esc(d)}</div><div class="m">${ex.length} ${ex.length === 1 ? 'Übung' : 'Übungen'} · ${sets} Sätze</div></div>
+      ${d === nd && !s ? '<span class="badge">Als Nächstes</span>' : '<span class="chev">›</span>'}</button>`;
+  });
+  if (!days().length) html += `<div class="empty">Plan in den Einstellungen neu laden.</div>`;
+  html += `</div>${tabs('home')}`;
+  $app.innerHTML = html;
+}
+
+const STOPP = {
+  'TV': 'Technisches Versagen: so viele Wiederholungen, bis die nächste nicht mehr sauber gelingen würde. Verändert sich die Technik, ist der Satz beendet (RIR 0–1).',
+  'TEMPO': 'Stopp bei Tempoverlust: Wird eine Wiederholung deutlich langsamer als die erste und fühlt sich wie ein „Grind“ an, ist sie die letzte des Satzes (RIR 1–2).',
+  'TV+': 'Technisches Versagen, im letzten Satz danach 3–5 Teilwiederholungen im unteren, gedehnten Drittel, bis auch die nicht mehr gehen.'
+};
+const SAUBER = 'Volle ROM bis in die Dehnung, Exzentrik 2–3 s, kein Schwung, keine Ausweichbewegung. Abgefälscht = nicht gezählt.';
+
+function renderTrain() {
+  const s = active();
+  const list = exercisesFor(s.tag, s.standort);
+  if (!list.length) { toast('Keine Übungen für diesen Tag'); view = 'home'; return renderHome(); }
+  s.idx = Math.min(Math.max(0, s.idx), list.length - 1);
+  const ex = list[s.idx];
+  const variant = variantOf(s, ex);
+  const body = isBody(variant);
+  const done = s.sets.filter(x => x.uebung_id === ex.uebung_id).sort((a, b) => a.satz_nr - b.satz_nr);
+  const skipped = s.skipped[ex.uebung_id] || [];
+  const exSkipped = skipped === 'all';
+  const last = lastValues(ex, variant, s.standort, s.id);
+
+  let editNr = s.edit && s.edit.uebung_id === ex.uebung_id ? s.edit.satz_nr : null;
+  if (editNr == null && !exSkipped) {
+    for (let k = 1; k <= ex.saetze; k++) {
+      if (!done.find(x => x.satz_nr === k) && !(Array.isArray(skipped) && skipped.includes(k))) { editNr = k; break; }
+    }
+  }
+  const editing = editNr != null ? done.find(x => x.satz_nr === editNr) : null;
+  const ref = editing || (last && last.sets.find(x => x.satz_nr === editNr)) || done[done.length - 1] || (last && last.sets[last.sets.length - 1]) || null;
+  const preKg = editing ? (body ? editing.zusatz : editing.kg) : ref ? (body ? ref.zusatz : ref.kg) : '';
+  const preWdh = editing ? editing.wdh : ref ? ref.wdh : '';
+  const pad = n => String(n).padStart(2, '0');
+  const cols = Math.min(ex.saetze, 4);
+
+  let html = `<div class="top">
+      <div class="kicker grow">${esc(s.tag.split(' · ')[0])} · ${esc(s.standort)}</div>
+      <button type="button" class="iconbtn" data-act="overview" aria-label="Übersicht">☰</button>
+      <button type="button" class="outline" data-act="finish">Ende</button>
+    </div>
+    <button type="button" class="varbtn" data-act="variant">${pad(s.idx + 1)} / ${pad(list.length)} · <b>${esc(variant)}${perHand(variant) ? ' · pro Hand' : ''}</b> ▾</button>
+    <h1 style="margin-top:4px;font-size:${ex.uebung.length > 20 ? 36 : ex.uebung.length > 12 ? 44 : 52}px">${esc(ex.uebung)}</h1>
+    <div class="meta">
+      <span class="pill acc">${ex.saetze} × ${esc(ex.soll_wdh)}</span>
+      <button type="button" class="pill" data-act="stopp">${esc(ex.stopp)} ⓘ</button>
+      <button type="button" class="pill line" data-act="howto">Ausführung ›</button>
+    </div>
+    <div class="tiles" style="grid-template-columns:repeat(${cols},minmax(0,1fr))">`;
+  for (let k = 1; k <= ex.saetze; k++) {
+    const d = done.find(x => x.satz_nr === k);
+    const sk = exSkipped || (Array.isArray(skipped) && skipped.includes(k));
+    const now = k === editNr;
+    if (d) html += `<button type="button" class="tile ${now ? 'now' : 'done'}" data-edit="${k}"><div class="k">SATZ ${k}${now ? ' · ÄNDERN' : ''}</div><div class="v">${esc(tileLabel(d))}</div></button>`;
+    else if (sk) html += `<button type="button" class="tile skip" data-unskip="${k}"><div class="k">SATZ ${k}</div><div class="v">ÜBERSPR.</div></button>`;
+    else html += `<div class="tile ${now ? 'now' : ''}"><div class="k">SATZ ${k}</div><div class="v">${now ? 'JETZT' : '—'}</div></div>`;
+  }
+  html += `</div>
+    <div class="last">${last
+      ? `Zuletzt ${fmtDate(last.s.end)}${last.other ? ` · <span style="color:var(--warn)">${esc(last.s.standort)}</span>` : ''}: <b>${last.sets.map(tileLabel).join(' · ')}</b>`
+      : 'Noch keine Werte für diese Variante'}</div>`;
+
+  if (editNr != null) html += editorHtml(editNr, ex, variant, body, preKg, preWdh, editing);
+  else html += `<div class="editor"><div class="card" style="text-align:center">
+      <div class="c" style="font-size:22px">${exSkipped ? 'Übung übersprungen' : 'Übung erledigt'}</div>
+      ${exSkipped ? '<button type="button" class="ghost" data-act="unskipEx" style="margin-top:10px">Doch machen</button>' : ''}</div>
+      <button type="button" class="primary" data-act="next" ${s.idx === list.length - 1 ? 'data-last="1"' : ''}>${s.idx === list.length - 1 ? 'Training beenden' : 'Nächste Übung'}</button></div>`;
+
+  html += `<div class="foot">
+      <button type="button" data-act="prev" ${s.idx === 0 ? 'disabled' : ''}>‹ Zurück</button>
+      ${!done.length && !exSkipped ? '<button type="button" data-act="skipEx">Übung überspringen</button>' : '<span></span>'}
+      <button type="button" data-act="next" ${s.idx === list.length - 1 ? 'disabled' : ''}>Weiter ›</button>
+    </div>`;
+  $app.innerHTML = html;
+}
+
+function tileLabel(x) {
+  if (isBody(x.variant)) return (x.zusatz ? '+' + fmt(x.zusatz) : 'KG') + '×' + x.wdh;
+  return fmt(x.kg) + '×' + x.wdh;
+}
+
+function editorHtml(k, ex, variant, body, preKg, preWdh, editing) {
+  const kgLabel = body ? 'Zusatz kg' : perHand(variant) ? 'kg pro Hand' : 'kg';
+  return `<div class="editor">
+    <div class="boxes">
+      <div class="box" style="flex:3"><label for="kg">${kgLabel}</label>
+        <input id="kg" class="num" type="text" inputmode="decimal" value="${esc(fmt(num(preKg)))}" placeholder="${body ? '0' : '–'}"></div>
+      <div class="box" style="flex:2"><label for="wdh">WDH</label>
+        <input id="wdh" class="num" type="text" inputmode="numeric" value="${esc(preWdh)}" placeholder="–"></div>
+    </div>
+    <div class="keys">
+      <button type="button" data-step="-1" aria-label="Gewicht verringern" style="flex:1">−</button>
+      <button type="button" data-step="1" aria-label="Gewicht erhöhen" style="flex:1">+</button>
+      ${editing
+        ? `<button type="button" class="txt" data-act="delSet" data-nr="${k}" style="flex:2;color:var(--bad)">Löschen</button>`
+        : `<button type="button" class="txt" data-act="skipSet" data-nr="${k}" style="flex:2">Überspringen</button>`}
+    </div>
+    <input id="notiz" class="text" placeholder="Notiz (optional)" value="${esc(editing ? editing.notiz : '')}" maxlength="300">
+    <button type="button" class="primary" data-act="saveSet" data-nr="${k}">${editing ? 'Änderung speichern' : 'Satz speichern'}</button>
+    ${editing ? '<button type="button" class="ghost" data-act="cancelEdit">Abbrechen</button>' : ''}
+  </div>`;
+}
+
+function showHowto() {
+  const ex = currentEx();
+  sheet(`<div class="kicker">Ausführung</div><h3 style="margin-top:6px">${esc(ex.uebung)}</h3>
+    <p>${esc(ex.ausfuehrung || ex.hinweis || 'Keine Beschreibung im Plan.')}</p>
+    <div class="lbl">Stopp-Regel · ${esc(ex.stopp)}</div><p>${esc(STOPP[ex.stopp] || '')}</p>
+    <div class="lbl">Saubere Wiederholung</div><p>${esc(SAUBER)}</p>
+    ${ex.varianten.length > 1 ? `<div class="lbl">Alternativen</div><p>${ex.varianten.slice(1).map(esc).join(' · ')}</p>` : ''}
+    <button type="button" class="secondary" data-opt="x" style="width:100%;margin-top:6px">Schließen</button>`, () => {});
+}
+function showStopp() {
+  const ex = currentEx();
+  sheet(`<div class="kicker">Stopp-Regel</div><h3 style="margin-top:6px">${esc(ex.stopp)}</h3><p>${esc(STOPP[ex.stopp] || '')}</p>
+    <div class="lbl">Saubere Wiederholung</div><p>${esc(SAUBER)}</p>
+    <button type="button" class="secondary" data-opt="x" style="width:100%">Schließen</button>`, () => {});
+}
+
+function renderLog() {
+  const sess = S.sessions.filter(s => s.end && s.sets.length && (logFilter === 'alle' || s.standort === logFilter))
+    .sort((a, b) => b.end.localeCompare(a.end));
+  const un = unsentCount();
+  let html = `<div class="top"><h1 class="grow page">Log</h1>${un
+    ? `<button type="button" class="badge warn" data-act="sync" style="height:34px">${un} nicht gesendet · senden</button>`
+    : `<span class="badge ok">✓ synchronisiert</span>`}</div>
+    <div class="row wrap">${['alle', ...STANDORTE].map(f => `<button type="button" class="chip ${logFilter === f ? 'on' : ''}" data-filter="${f}">${f === 'alle' ? 'Alle Standorte' : f}</button>`).join('')}</div>`;
+  if (!sess.length) html += `<div class="empty">Noch keine abgeschlossenen Einheiten.</div>`;
+  sess.slice(0, 30).forEach(s => {
+    html += `<div class="sess"><span>${fmtDate(s.end)} · ${esc(s.standort)} · ${esc(s.tag)}</span>
+      <span style="color:${s.sent ? 'var(--acc)' : 'var(--warn)'}">${s.sets.length} Sätze ${s.sent ? '✓' : '· offen'}</span></div><div class="cardlist">`;
+    s.sets.slice().sort((a, b) => a.ts.localeCompare(b.ts)).forEach(x => {
+      html += `<div class="lrow"><div class="grow"><div class="x">${esc(x.uebung)}</div><div class="y">Satz ${x.satz_nr} · ${esc(x.variant)}${x.notiz ? ' · ' + esc(x.notiz) : ''}</div></div><div class="z">${esc(setLabel(x))}</div></div>`;
+    });
+    html += `</div>`;
+  });
+  html += tabs('log');
+  $app.innerHTML = html;
+}
+
+function renderSettings() {
+  $app.innerHTML = `<div class="top"><h1 class="grow page" style="font-size:40px">Einstellungen</h1></div>
+    <h2>Plan</h2><div class="card"><div class="small muted">Gepflegt im Google Sheet, Tab „Plan“.${S.planAt ? ' Zuletzt geladen ' + new Date(S.planAt).toLocaleString('de-DE') : ''}</div>
+      <button type="button" class="secondary" data-act="reloadPlan" style="margin-top:12px;width:100%">Plan neu laden</button></div>
+    <h2>Gewichts-Schritt (+/−)</h2><div class="row wrap">${[1, 1.25, 2.5, 5].map(v =>
+      `<button type="button" class="chip ${S.settings.step === v ? 'on' : ''}" data-stepset="${v}">${fmt(v)} kg</button>`).join('')}</div>
+    <h2>Verbindung</h2><div class="card"><div class="small muted">Schlüssel gespeichert auf diesem iPhone.</div>
+      <button type="button" class="ghost" data-act="resetKey" style="margin-top:12px;width:100%;color:var(--bad)">Schlüssel ändern</button></div>
+    ${tabs('settings')}`;
+}
+
+/* ---------- Dialoge ---------- */
+function sheet(html, onClick) {
+  const o = document.createElement('div'); o.className = 'overlay';
+  o.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
+  o.addEventListener('click', e => {
+    if (e.target === o) return o.remove();
+    const b = e.target.closest('[data-opt]'); if (!b) return;
+    o.remove(); onClick(b.dataset.opt);
+  });
+  document.body.appendChild(o);
+}
+function confirmFinish() {
+  const s = active(); const n = s.sets.length;
+  sheet(`<h3>Training beenden?</h3><p>${n} Sätze werden gespeichert und an den Log gesendet. Ohne Netz wird später nachgesendet.</p>
+    <div class="list"><button type="button" class="primary" data-opt="finish">Beenden und senden</button>
+    <button type="button" class="secondary" data-opt="cancel">Weiter trainieren</button>
+    ${n === 0 ? '<button type="button" class="ghost" data-opt="discard" style="color:var(--bad)">Einheit verwerfen</button>' : ''}</div>`,
+    o => { if (o === 'finish') finishSession(); if (o === 'discard') discardSession(); });
+}
+
+/* ---------- Eingaben ---------- */
+$app.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t || t.disabled) return;
+  const d = t.dataset;
+  if (d.standort) { S.settings.standort = d.standort; save(); return render(); }
+  if (d.view) { view = d.view; return render(); }
+  if (d.filter) { logFilter = d.filter; return render(); }
+  if (d.stepset) { S.settings.step = Number(d.stepset); save(); return render(); }
+  if (d.day) {
+    const ex = exercisesFor(d.day, S.settings.standort);
+    return sheet(`<h3>${esc(d.day)}</h3><p>${esc(S.settings.standort)} · ${ex.length} Übungen</p>
+      <div class="list"><button type="button" class="primary" data-opt="go">Training starten</button></div>`, () => startSession(d.day));
+  }
+  const s = active();
+  if (d.step) {
+    const i = document.getElementById('kg');
+    const v = (num(i.value) || 0) + Number(d.step) * S.settings.step;
+    i.value = fmt(Math.max(0, v)); return;
+  }
+  if (d.edit && s) { s.edit = { uebung_id: currentEx().uebung_id, satz_nr: Number(d.edit) }; save(); return render(); }
+  if (d.unskip && s) {
+    const ex = currentEx(); const arr = s.skipped[ex.uebung_id];
+    if (Array.isArray(arr)) s.skipped[ex.uebung_id] = arr.filter(k => k !== Number(d.unskip));
+    save(); return render();
+  }
+  switch (d.act) {
+    case 'resume': view = 'train'; return render();
+    case 'finish': return confirmFinish();
+    case 'sync': return sync(true);
+    case 'reloadPlan': return loadPlan(false).then(render).catch(() => {});
+    case 'resetKey':
+      return sheet(`<h3>Schlüssel ändern?</h3><p>Danach musst du den neuen Schlüssel einmal eingeben. Deine Daten bleiben erhalten.</p>
+        <div class="list"><button type="button" class="primary" data-opt="ok">Schlüssel ändern</button></div>`, () => { S.settings.key = ''; save(); render(); });
+    case 'prev': s.idx--; s.edit = null; save(); return render();
+    case 'next': if (d.last) return confirmFinish(); s.idx++; s.edit = null; save(); render(); return window.scrollTo(0, 0);
+    case 'overview': return overview();
+    case 'howto': return showHowto();
+    case 'stopp': return showStopp();
+    case 'variant': return chooseVariant();
+    case 'cancelEdit': s.edit = null; save(); return render();
+    case 'skipEx': { const ex = currentEx(); s.skipped[ex.uebung_id] = 'all'; advance(); return; }
+    case 'unskipEx': { const ex = currentEx(); delete s.skipped[ex.uebung_id]; save(); return render(); }
+    case 'skipSet': {
+      const ex = currentEx(); const arr = Array.isArray(s.skipped[ex.uebung_id]) ? s.skipped[ex.uebung_id] : [];
+      arr.push(Number(d.nr)); s.skipped[ex.uebung_id] = arr; save(); return afterSet(ex);
+    }
+    case 'delSet': {
+      const ex = currentEx();
+      s.sets = s.sets.filter(x => !(x.uebung_id === ex.uebung_id && x.satz_nr === Number(d.nr)));
+      s.edit = null; save(); toast('Satz gelöscht'); return render();
+    }
+    case 'saveSet': return saveSet(Number(d.nr));
+  }
+});
+
+function currentEx() { const s = active(); return exercisesFor(s.tag, s.standort)[s.idx]; }
+
+function saveSet(nr) {
+  const s = active(); const ex = currentEx(); const variant = variantOf(s, ex); const body = isBody(variant);
+  const kgIn = num(document.getElementById('kg').value);
+  const wdh = parseInt(document.getElementById('wdh').value, 10);
+  const notiz = document.getElementById('notiz').value.trim().slice(0, 300);
+  if (!body && (kgIn == null || kgIn < 0 || kgIn > 500)) return toast('Gewicht prüfen');
+  if (body && kgIn != null && (kgIn < 0 || kgIn > 200)) return toast('Zusatzgewicht prüfen');
+  if (!Number.isInteger(wdh) || wdh < 0 || wdh > 100) return toast('Wiederholungen prüfen');
+  const existing = s.sets.find(x => x.uebung_id === ex.uebung_id && x.satz_nr === nr);
+  const data = { uebung_id: ex.uebung_id, uebung: ex.uebung, variant, satz_nr: nr,
+    kg: body ? 0 : kgIn, zusatz: body ? (kgIn || 0) : 0, wdh, soll_wdh: ex.soll_wdh, notiz };
+  if (existing) Object.assign(existing, data);
+  else s.sets.push({ id: uid(), ts: new Date().toISOString(), ...data });
+  const wasEdit = !!s.edit; s.edit = null; save();
+  if (document.activeElement) document.activeElement.blur();
+  if (wasEdit) { toast('Geändert'); return render(); }
+  afterSet(ex);
+}
+function afterSet(ex) {
+  const s = active();
+  const done = s.sets.filter(x => x.uebung_id === ex.uebung_id).length;
+  const sk = Array.isArray(s.skipped[ex.uebung_id]) ? s.skipped[ex.uebung_id].length : 0;
+  if (done + sk >= ex.saetze) return advance();
+  save(); render();
+}
+function advance() {
+  const s = active(); const n = exercisesFor(s.tag, s.standort).length;
+  s.edit = null;
+  if (s.idx < n - 1) { s.idx++; save(); render(); window.scrollTo(0, 0); }
+  else { save(); render(); confirmFinish(); }
+}
+function overview() {
+  const s = active(); const list = exercisesFor(s.tag, s.standort);
+  sheet(`<h3>${esc(s.tag)}</h3><p>${esc(s.standort)}</p><div class="list">${list.map((ex, i) => {
+    const n = s.sets.filter(x => x.uebung_id === ex.uebung_id).length;
+    const sk = s.skipped[ex.uebung_id] === 'all';
+    return `<button type="button" class="opt ${i === s.idx ? 'on' : ''}" data-opt="${i}"><span>${esc(ex.uebung)}</span><span class="small ${sk ? 'muted' : ''}" style="color:${n >= ex.saetze ? 'var(--acc)' : ''}">${sk ? 'übersprungen' : n + '/' + ex.saetze}</span></button>`;
+  }).join('')}</div>`, i => { s.idx = Number(i); s.edit = null; save(); render(); window.scrollTo(0, 0); });
+}
+function chooseVariant() {
+  const s = active(); const ex = currentEx(); const cur = variantOf(s, ex);
+  if (s.sets.some(x => x.uebung_id === ex.uebung_id)) return toast('Variante nur vor dem ersten Satz änderbar');
+  sheet(`<h3>Gerät / Variante</h3><p>${esc(ex.uebung)} · wird für ${esc(s.standort)} gemerkt</p><div class="list">${ex.varianten.map(v =>
+    `<button type="button" class="opt ${v === cur ? 'on' : ''}" data-opt="${esc(v)}"><span>${esc(v)}</span>${v === cur ? '<span style="color:var(--acc)">✓</span>' : ''}</button>`).join('')}</div>`,
+    v => {
+      s.variants[ex.uebung_id] = v;
+      S.settings.variantPref = S.settings.variantPref || {};
+      S.settings.variantPref[s.standort + '|' + ex.uebung_id] = v;
+      save(); render();
+    });
+}
+/* ---------- Start ---------- */
+window.addEventListener('online', () => sync(false));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') sync(false); });
+if (S.activeId && active()) view = 'train';
+render();
+if (S.settings.key) { loadPlan(true).then(ok => { if (ok && view !== 'train') render(); }).catch(() => render()); sync(false); }
+if (S.activeId && active()) {
+  setTimeout(() => {
+    const s = active(); if (!s) return;
+    const h = (Date.now() - new Date(s.start).getTime()) / 3.6e6;
+    if (h > 4) sheet(`<h3>Offene Einheit von ${fmtDate(s.start)}</h3><p>${esc(s.tag)} · ${s.sets.length} Sätze. Fortsetzen oder beenden und senden?</p>
+      <div class="list"><button type="button" class="primary" data-opt="finish">Beenden und senden</button><button type="button" class="secondary" data-opt="go">Fortsetzen</button></div>`,
+      o => { if (o === 'finish') finishSession(); });
+  }, 300);
+}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
